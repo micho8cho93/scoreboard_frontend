@@ -31,9 +31,12 @@ async function init() {
 async function loadSports() {
     try {
         showLoading();
-        const response = await fetch(`${API_BASE_URL}/sports`);
+        const url = `${API_BASE_URL}/sports`;
+        console.log('Fetching sports from:', url);
+        const response = await fetch(url);
+        console.log('Response status:', response.status, response.statusText);
         if (!response.ok) {
-            throw new Error('Failed to load sports');
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const sports = await response.json();
         
@@ -50,8 +53,14 @@ async function loadSports() {
         showEmptyState();
     } catch (error) {
         console.error('Error loading sports:', error);
+        console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+        });
         hideLoading();
-        alert('Failed to load sports. Make sure the backend is running.');
+        const errorMsg = error.message || 'Unknown error';
+        alert(`Failed to load sports: ${errorMsg}\n\nURL: ${API_BASE_URL}/sports\n\nCheck browser console for details.`);
     }
 }
 
@@ -61,9 +70,12 @@ async function loadSports() {
 async function loadGames(sportId) {
     try {
         showLoading();
-        const response = await fetch(`${API_BASE_URL}/sports/${sportId}/games`);
+        const url = `${API_BASE_URL}/sports/${sportId}/games`;
+        console.log('Fetching games from:', url);
+        const response = await fetch(url);
+        console.log('Response status:', response.status, response.statusText);
         if (!response.ok) {
-            throw new Error('Failed to load games');
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const games = await response.json();
         
@@ -81,7 +93,8 @@ async function loadGames(sportId) {
     } catch (error) {
         console.error('Error loading games:', error);
         hideLoading();
-        alert('Failed to load games.');
+        const errorMsg = error.message || 'Unknown error';
+        alert(`Failed to load games: ${errorMsg}\n\nCheck browser console for details.`);
     }
 }
 
@@ -99,9 +112,12 @@ async function loadGame(gameId) {
         }
         
         // Load game state
-        const response = await fetch(`${API_BASE_URL}/games/${gameId}`);
+        const url = `${API_BASE_URL}/games/${gameId}`;
+        console.log('Fetching game from:', url);
+        const response = await fetch(url);
+        console.log('Response status:', response.status, response.statusText);
         if (!response.ok) {
-            throw new Error('Failed to load game');
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const game = await response.json();
         
@@ -126,7 +142,8 @@ async function loadGame(gameId) {
     } catch (error) {
         console.error('Error loading game:', error);
         hideLoading();
-        alert('Failed to load game.');
+        const errorMsg = error.message || 'Unknown error';
+        alert(`Failed to load game: ${errorMsg}\n\nCheck browser console for details.`);
     }
 }
 
