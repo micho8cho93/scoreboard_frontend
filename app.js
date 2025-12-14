@@ -151,33 +151,60 @@ async function loadGame(gameId) {
  * Connect to WebSocket for real-time updates
  */
 function connectWebSocket(gameId) {
+    // Close existing WebSocket connection
+    if (websocket) {
+        websocket.close();
+        websocket = null;
+    }
+    
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsHost = API_BASE_URL.replace(/^https?:/, wsProtocol);
     const wsUrl = `${wsHost}/ws/games/${gameId}`;
+    
+    console.log('Connecting to WebSocket:', wsUrl);
     
     try {
         websocket = new WebSocket(wsUrl);
         currentGameId = gameId;
         
         websocket.onopen = () => {
-            console.log('WebSocket connected');
+            console.log('WebSocket connected successfully');
         };
         
         websocket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            addEventToUI(data);
+            console.log('WebSocket message received:', event.data);
+            try {
+                const data = JSON.parse(event.data);
+                console.log('Parsed WebSocket data:', data);
+                addEventToUI(data);
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
         };
         
         websocket.onerror = (error) => {
             console.error('WebSocket error:', error);
+            console.error('WebSocket URL was:', wsUrl);
         };
         
-        websocket.onclose = () => {
-            console.log('WebSocket disconnected');
-            // Optionally attempt to reconnect
+        websocket.onclose = (event) => {
+            console.log('WebSocket disconnected', {
+                code: event.code,
+                reason: event.reason,
+                wasClean: event.wasClean
+            });
+            // Optionally attempt to reconnect after a delay
+            if (event.code !== 1000) { // Not a normal closure
+                console.log('Attempting to reconnect in 3 seconds...');
+                setTimeout(() => {
+                    if (currentGameId === gameId) {
+                        connectWebSocket(gameId);
+                    }
+                }, 3000);
+            }
         };
     } catch (error) {
-        console.error('Failed to connect WebSocket:', error);
+        console.error('Failed to create WebSocket:', error);
     }
 }
 
