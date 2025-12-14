@@ -2,7 +2,7 @@
  * Real-Time Scoreboard Frontend Application
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://micho8cho93.github.io/scoreboard_frontend/'; 'http://localhost:8000';
 let currentGameId = null;
 let websocket = null;
 
