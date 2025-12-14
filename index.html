@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Scoreboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="app-name">Real-Time Scoreboard</h1>
+            <div class="selectors">
+                <div class="selector-group">
+                    <label for="sport-select">Sport:</label>
+                    <select id="sport-select" class="dropdown">
+                        <option value="">Select a sport...</option>
+                    </select>
+                </div>
+                <div class="selector-group">
+                    <label for="game-select">Game:</label>
+                    <select id="game-select" class="dropdown" disabled>
+                        <option value="">Select a game...</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <div id="loading" class="loading hidden">Loading...</div>
+            <div id="empty-state" class="empty-state hidden">
+                <p>Select a sport and game to view the scoreboard</p>
+            </div>
+            <div id="scoreboard-container" class="scoreboard-container hidden">
+                <div class="scoreboard-header">
+                    <div class="team-header team-a">
+                        <h2 id="team-a-name">Team A</h2>
+                    </div>
+                    <div class="team-header team-b">
+                        <h2 id="team-b-name">Team B</h2>
+                    </div>
+                </div>
+                <div class="scoreboard-content">
+                    <div class="team-column team-a" id="team-a-column">
+                        <!-- Events for Team A -->
+                    </div>
+                    <div class="team-column team-b" id="team-b-column">
+                        <!-- Events for Team B -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,237 @@
+/* Real-Time Scoreboard Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.app-name {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.selectors {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.selector-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.selector-group label {
+    font-size: 0.9em;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.dropdown {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    font-size: 1em;
+    cursor: pointer;
+    min-width: 200px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s;
+}
+
+.dropdown:hover:not(:disabled) {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Main Content */
+.main {
+    padding: 30px;
+    min-height: 400px;
+}
+
+.loading, .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    font-size: 1.2em;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Scoreboard */
+.scoreboard-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.scoreboard-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: #e0e0e0;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
+.team-header {
+    padding: 20px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.3em;
+}
+
+.team-header.team-a {
+    background: #4a90e2;
+    color: white;
+}
+
+.team-header.team-b {
+    background: #e24a4a;
+    color: white;
+}
+
+.scoreboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: #e0e0e0;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.team-column {
+    background: white;
+    padding: 15px;
+    min-height: 200px;
+}
+
+.team-column.team-a {
+    border-right: 1px solid #e0e0e0;
+}
+
+/* Play-by-Play Entry */
+.play-by-play-entry {
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-left: 4px solid;
+    border-radius: 4px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.team-column.team-a .play-by-play-entry {
+    border-left-color: #4a90e2;
+}
+
+.team-column.team-b .play-by-play-entry {
+    border-left-color: #e24a4a;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.entry-minute {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 4px;
+}
+
+.entry-description {
+    color: #333;
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+/* Scrollbar styling */
+.scoreboard-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scoreboard-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.scoreboard-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.scoreboard-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-name {
+        font-size: 1.8em;
+    }
+    
+    .selectors {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dropdown {
+        width: 100%;
+    }
+    
+    .scoreboard-header,
+    .scoreboard-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-column.team-a {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+}
+
