@@ -151,60 +151,161 @@ async function loadGame(gameId) {
  * Connect to WebSocket for real-time updates
  */
 function connectWebSocket(gameId) {
-    // Close existing WebSocket connection
     if (websocket) {
+        console.log('Closing existing WebSocket connection');
         websocket.close();
         websocket = null;
     }
     
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = API_BASE_URL.replace(/^https?:/, wsProtocol);
-    const wsUrl = `${wsHost}/ws/games/${gameId}`;
+    // Clear any existing ping interval
+    if (window.websocketPingInterval) {
+        clearInterval(window.websocketPingInterval);
+        window.websocketPingInterval = null;
+    }
     
-    console.log('Connecting to WebSocket:', wsUrl);
+    const wsUrl = `wss://bobcatlive.up.railway.app/ws/games/${gameId}`;
+    
+    console.log('========================================');
+    console.log('🔌 CONNECTING TO WEBSOCKET');
+    console.log('Game ID:', gameId);
+    console.log('WebSocket URL:', wsUrl);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('========================================');
     
     try {
         websocket = new WebSocket(wsUrl);
         currentGameId = gameId;
         
         websocket.onopen = () => {
-            console.log('WebSocket connected successfully');
+            console.log('========================================');
+            console.log('✅✅✅ WEBSOCKET CONNECTED ✅✅✅');
+            console.log('Ready state:', websocket.readyState);
+            console.log('Timestamp:', new Date().toISOString());
+            console.log('========================================');
+            
+            // Send initial ping
+            try {
+                websocket.send('ping');
+                console.log('📤 Sent initial ping');
+            } catch (e) {
+                console.error('❌ Failed to send initial ping:', e);
+            }
+            
+            // Set up periodic ping every 20 seconds to keep connection alive
+            window.websocketPingInterval = setInterval(() => {
+                if (websocket && websocket.readyState === WebSocket.OPEN) {
+                    try {
+                        websocket.send('ping');
+                        console.log('💓 Keepalive ping sent at', new Date().toISOString());
+                    } catch (e) {
+                        console.error('❌ Failed to send keepalive ping:', e);
+                        clearInterval(window.websocketPingInterval);
+                    }
+                } else {
+                    console.warn('⚠️ WebSocket not open, clearing ping interval');
+                    clearInterval(window.websocketPingInterval);
+                }
+            }, 20000); // 20 seconds
         };
         
         websocket.onmessage = (event) => {
-            console.log('WebSocket message received:', event.data);
+            const timestamp = new Date().toISOString();
+            console.log('========================================');
+            console.log('📨 WEBSOCKET MESSAGE RECEIVED');
+            console.log('Timestamp:', timestamp);
+            console.log('Raw data:', event.data);
+            console.log('========================================');
+            
+            // Handle pong response
+            if (event.data === 'pong') {
+                console.log('✅ Pong received - connection alive at', timestamp);
+                return;
+            }
+            
             try {
                 const data = JSON.parse(event.data);
-                console.log('Parsed WebSocket data:', data);
+                console.log('📦 Parsed message data:', data);
+                
+                // Handle different message types
+                if (data.type === 'connection_established') {
+                    console.log('✅ Server confirmed connection:', data.message);
+                    return;
+                }
+                
+                if (data.type === 'keepalive') {
+                    console.log('💓 Server keepalive received at', timestamp);
+                    return;
+                }
+                
+                // This is a game event - add it to UI
+                console.log('🎯 GAME EVENT RECEIVED:');
+                console.log('  Event ID:', data.event_id);
+                console.log('  Game ID:', data.game_id);
+                console.log('  Team:', data.team);
+                console.log('  Minute:', data.minute);
+                console.log('  Description:', data.description);
+                
                 addEventToUI(data);
+                console.log('✅ Event added to UI successfully');
+                
             } catch (error) {
-                console.error('Error parsing WebSocket message:', error);
+                console.error('❌ Error parsing message:', error);
+                console.error('Raw data was:', event.data);
             }
         };
         
         websocket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            console.error('WebSocket URL was:', wsUrl);
+            console.error('========================================');
+            console.error('❌❌❌ WEBSOCKET ERROR ❌❌❌');
+            console.error('Timestamp:', new Date().toISOString());
+            console.error('Error:', error);
+            console.error('WebSocket state:', websocket?.readyState);
+            console.error('========================================');
         };
         
         websocket.onclose = (event) => {
-            console.log('WebSocket disconnected', {
-                code: event.code,
-                reason: event.reason,
-                wasClean: event.wasClean
-            });
-            // Optionally attempt to reconnect after a delay
-            if (event.code !== 1000) { // Not a normal closure
-                console.log('Attempting to reconnect in 3 seconds...');
+            console.log('========================================');
+            console.log('🔌 WEBSOCKET CLOSED');
+            console.log('Timestamp:', new Date().toISOString());
+            console.log('Code:', event.code);
+            console.log('Reason:', event.reason);
+            console.log('Was clean:', event.wasClean);
+            console.log('========================================');
+            
+            // Clear ping interval
+            if (window.websocketPingInterval) {
+                clearInterval(window.websocketPingInterval);
+                window.websocketPingInterval = null;
+            }
+            
+            // Close code meanings
+            const closeCodes = {
+                1000: 'Normal closure',
+                1001: 'Going away',
+                1002: 'Protocol error',
+                1006: 'Abnormal closure (connection lost)',
+                1008: 'Policy violation',
+                1011: 'Internal server error'
+            };
+            console.log('Meaning:', closeCodes[event.code] || 'Unknown code');
+            
+            // Attempt reconnection for abnormal closures
+            if (event.code !== 1000 && event.code !== 1005) {
+                console.log('⏰ Abnormal closure - will reconnect in 3 seconds...');
                 setTimeout(() => {
                     if (currentGameId === gameId) {
+                        console.log('🔄 Attempting to reconnect...');
                         connectWebSocket(gameId);
                     }
                 }, 3000);
             }
         };
+        
     } catch (error) {
-        console.error('Failed to create WebSocket:', error);
+        console.error('========================================');
+        console.error('❌ FATAL: Failed to create WebSocket');
+        console.error('Error:', error);
+        console.error('========================================');
     }
 }
 
@@ -258,9 +359,15 @@ function setupEventListeners() {
         if (gameId) {
             await loadGame(gameId);
         } else {
+            // Clean disconnect
             if (websocket) {
-                websocket.close();
+                console.log('🔌 Closing WebSocket due to game deselection');
+                websocket.close(1000, 'User deselected game'); // Normal closure
                 websocket = null;
+            }
+            if (window.websocketPingInterval) {
+                clearInterval(window.websocketPingInterval);
+                window.websocketPingInterval = null;
             }
             showEmptyState();
         }
